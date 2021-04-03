@@ -1,36 +1,68 @@
 package spbu_coding.trees_3
 
+import spbu_coding.trees_3.NodeSide.LEFT
+import spbu_coding.trees_3.NodeSide.RIGHT
+
+enum class NodeSide {
+    LEFT, RIGHT;
+
+    val opposite: NodeSide
+        get() = when (this) {
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+        }
+
+    companion object {
+        fun fromSignOf(signed: Int): NodeSide? = when {
+            signed < 0 -> LEFT
+            signed > 0 -> RIGHT
+            else -> null
+        }
+    }
+}
+
 val <K, V, T> Node<K, V, T>.parentNode: Node<K, V, T>? get() = parent as? Node
 val Node<*, *, *>.isRoot: Boolean get() = parent is RootHolder
-val Node<*, *, *>.isLeaf: Boolean get() = !hasLeft && !hasRight
-val Node<*, *, *>.isLeft: Boolean get() = parentNode?.left === this
-val Node<*, *, *>.isRight: Boolean get() = parentNode?.right === this
-val Node<*, *, *>.hasLeft: Boolean get() = left != null
-val Node<*, *, *>.hasRight: Boolean get() = right != null
+val Node<*, *, *>.isLeaf: Boolean get() = !has(LEFT) && !has(RIGHT)
 
-tailrec fun <K, V, T> Node<K, V, T>.rightestDescendent(): Node<K, V, T> =
-    if (hasRight) right!!.rightestDescendent()
+val Node<*, *, *>.side: NodeSide?
+    get() = when {
+        parentNode?.left === this -> LEFT
+        parentNode?.right === this -> RIGHT
+        else -> null
+    }
+
+operator fun <K, V, T> Node<K, V, T>.set(side: NodeSide, child: Node<K, V, T>?) = when (side) {
+    LEFT -> left = child
+    RIGHT -> right = child
+}
+
+operator fun <K, V, T> Node<K, V, T>.get(side: NodeSide): Node<K, V, T>? = when (side) {
+    LEFT -> left
+    RIGHT -> right
+}
+
+fun Node<*, *, *>.has(side: NodeSide) = this[side] != null
+
+tailrec fun <K, V, T> Node<K, V, T>.farthestDescendent(side: NodeSide): Node<K, V, T> =
+    if (has(side)) this[side]!!.farthestDescendent(side)
     else this
 
-tailrec fun <K, V, T> Node<K, V, T>.leftestDescendent(): Node<K, V, T> =
-    if (hasLeft) left!!.leftestDescendent()
-    else this
-
-fun <K, V, T> Node<K, V, T>.successor(): Node<K, V, T>? {
-    if (hasRight) return right!!.leftestDescendent()
+fun <K, V, T> Node<K, V, T>.nextToTheSide(side: NodeSide): Node<K, V, T>? {
+    if (has(side)) return this[side]!!.farthestDescendent(side.opposite)
     var cur = this
-    while (cur.isRight) cur = cur.parentNode!!
+    while (cur.side == side) cur = cur.parentNode!!
     return cur.parentNode
 }
 
-fun <K, V, T> Node<K, V, T>.attachLeftChild(newLeft: Node<K, V, T>?) {
-    left = newLeft
-    newLeft?.parent = this
+fun <K, V, T> RootHolder<K, V, T>.attachRoot(newRoot: Node<K, V, T>?) {
+    root = newRoot
+    newRoot?.parent = this
 }
 
-fun <K, V, T> Node<K, V, T>.attachRightChild(newRight: Node<K, V, T>?) {
-    right = newRight
-    newRight?.parent = this
+fun <K, V, T> Node<K, V, T>.attachChild(side: NodeSide, newChild: Node<K, V, T>?) {
+    this[side] = newChild
+    newChild?.parent = this
 }
 
 fun <K, V, T> Node<K, V, T>.detach(): Unit = null.attachInPlaceOf(this)
@@ -42,7 +74,7 @@ fun <K, V, T> NodeParent<K, V, T>.replaceChild(old: Node<K, V, T>, new: Node<K, 
         this is Node && old === left -> left = new
         this is Node && old === right -> right = new
         this is RootHolder && old === root -> root = new
-        else -> throw IllegalArgumentException("$old isn't child of $this")
+        else -> throw IllegalArgumentException("<$old> isn't child of <$this>")
     }
     new?.parent = this
 }
