@@ -65,6 +65,11 @@ fun <K, V, T> Node<K, V, T>.attachChild(side: NodeSide, newChild: Node<K, V, T>?
     newChild?.parent = this
 }
 
+fun <K, V, T> Node<K, V, T>.deleteNodeWithAtMostOneChild() {
+    require(!has(LEFT) || !has(RIGHT))
+    (left ?: right).attachInPlaceOf(this)
+}
+
 fun <K, V, T> Node<K, V, T>.detach(): Unit = null.attachInPlaceOf(this)
 
 fun <K, V, T> Node<K, V, T>?.attachInPlaceOf(other: Node<K, V, T>): Unit = other.parent.replaceChild(other, this)
