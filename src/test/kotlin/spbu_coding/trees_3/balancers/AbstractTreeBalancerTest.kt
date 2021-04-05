@@ -1,4 +1,4 @@
-package spbu_coding.trees_3.balancer
+package spbu_coding.trees_3.balancers
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
