@@ -3,7 +3,16 @@ package spbu_coding.trees_3
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.function.Executable
+import org.junit.jupiter.params.ParameterizedTest
 import spbu_coding.trees_3.NodeSide.*
+
+const val PARAMETRISED_TEST_NAME_INCLUDING_DISPLAY_NAME: String =
+    "${ParameterizedTest.DISPLAY_NAME_PLACEHOLDER}: ${ParameterizedTest.DEFAULT_DISPLAY_NAME}"
+
+tailrec fun <K, V, T> NodeParent<K, V, T>.findRootHolder(): RootHolder<K, V, T> = when (this) {
+    is RootHolder -> this
+    is Node -> parent.findRootHolder()
+}
 
 fun <K, V, T> RootHolder<K, V, T>.inOrderNodeList(): List<Node<K, V, T>> =
     generateSequence(root?.farthestDescendent(LEFT)) { it.nextToTheSide(RIGHT) }.toList()
