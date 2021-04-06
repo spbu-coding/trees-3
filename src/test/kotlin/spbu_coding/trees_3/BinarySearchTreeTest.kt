@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import spbu_coding.trees_3.NodeSide.*
-import spbu_coding.trees_3.test_node.SimpleTestNodeTree
 import java.util.*
 import java.util.AbstractMap.SimpleImmutableEntry
 import kotlin.collections.Map.Entry
@@ -507,79 +506,5 @@ class BinarySearchTreeTest {
 
         private fun Set<Int>.toStringEntries(): Set<SimpleImmutableEntry<Int, String>> =
             map { SimpleImmutableEntry(it, it.toString().intern()) }.toSet()
-    }
-}
-
-class BinarySearchTreeCompanionTest {
-    @Nested
-    inner class IfParentOfTwoSwapNonUserDataWithSuccessor {
-        private lateinit var tree: SimpleTestNodeTree
-
-        @BeforeEach
-        fun init() {
-            tree = SimpleTestNodeTree()
-        }
-
-        @Test
-        fun `parent of one non user data should not be swapped with successor`() {
-            val rIdBefore = tree.r.balancerData
-
-            BinarySearchTree.ifParentOfTwoSwapNonUserDataWithSuccessor(tree.r)
-
-            assertSame(rIdBefore, tree.r.balancerData)
-            assertSame(tree.root, tree.r.parent)
-            assertSame(tree.rl, tree.r.left)
-            assertNull(tree.r.right)
-        }
-
-        @Test
-        fun `user data should never be swapped with successor`() {
-            listOf(tree.root, tree.l, tree.lr, tree.lrr, tree.r, tree.rl, tree.rlr).assertAll { node ->
-                val keyBefore = node.key
-                val valueBefore = node.value
-
-                BinarySearchTree.ifParentOfTwoSwapNonUserDataWithSuccessor(node)
-
-                assertSame(keyBefore, node.key)
-                assertSame(valueBefore, node.value)
-            }
-        }
-
-        @Nested
-        inner class InputNodeIsParentOfTwo {
-            @Test
-            fun `when successor is right child non user data should be swapped with right child`() {
-                val lIdBefore = tree.l.balancerData
-                val lrIdBefore = tree.lr.balancerData
-
-                BinarySearchTree.ifParentOfTwoSwapNonUserDataWithSuccessor(tree.l)
-
-                assertSame(lrIdBefore, tree.l.balancerData)
-                assertSame(lIdBefore, tree.lr.balancerData)
-
-                tree.root.assertLeftChildIs(tree.lr)
-                tree.lr.assertLeftChildIs(tree.ll)
-                tree.lr.assertRightChildIs(tree.l)
-                tree.l.assertLeftChildIs(null)
-                tree.l.assertRightChildIs(tree.lrr)
-            }
-
-            @Test
-            fun `when successor is right child descendant non user data should be swapped with the descendant`() {
-                val rootIdBefore = tree.root.balancerData
-                val rlIdBefore = tree.rl.balancerData
-
-                BinarySearchTree.ifParentOfTwoSwapNonUserDataWithSuccessor(tree.root)
-
-                assertSame(rlIdBefore, tree.root.balancerData)
-                assertSame(rootIdBefore, tree.rl.balancerData)
-
-                tree.rootHolder.assertRootIs(tree.rl)
-                tree.rl.assertLeftChildIs(tree.l)
-                tree.rl.assertRightChildIs(tree.r)
-                tree.root.assertLeftChildIs(null)
-                tree.root.assertRightChildIs(tree.rlr)
-            }
-        }
     }
 }

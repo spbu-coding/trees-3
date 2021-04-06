@@ -19,7 +19,7 @@ object AVLTreeBalancer : TreeBalancer<Int> {
         rebalanceAfterChildHeightDecrease(node.parentNode)
     }
 
-    private fun <K, V> rebalanceAfterChildHeightIncrease(node: AVLNode<K, V>?) {
+    private tailrec fun <K, V> rebalanceAfterChildHeightIncrease(node: AVLNode<K, V>?) {
         if (node == null) return
         node.fixHeight()
         when (val balanceFactor = node.balanceFactor) {
@@ -29,7 +29,7 @@ object AVLTreeBalancer : TreeBalancer<Int> {
         }
     }
 
-    private fun <K, V> rebalanceAfterChildHeightDecrease(node: AVLNode<K, V>?) {
+    private tailrec fun <K, V> rebalanceAfterChildHeightDecrease(node: AVLNode<K, V>?) {
         if (node == null) return
         node.fixHeight()
         when (val balanceFactor = node.balanceFactor) {

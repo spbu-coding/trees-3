@@ -14,7 +14,7 @@ class BinarySearchTree<K, V, T>(
             modCount++
         }
     override val entries: MutableSet<MutableEntry<K, V>> = EntrySet()
-    private var rootHolder = RootHolder<K, V, T>()
+    private val rootHolder = RootHolder<K, V, T>()
     private var modCount = 0
 
     override fun containsKey(key: K): Boolean = getNode(key) != null
@@ -49,8 +49,7 @@ class BinarySearchTree<K, V, T>(
     }
 
     private fun removeNode(node: Node<K, V, T>) {
-        ifParentOfTwoSwapNonUserDataWithSuccessor(node)
-        node.deleteNodeWithAtMostOneChild()
+        node.delete()
         balancer.rebalanceAfterDeletion(node)
         size--
     }
@@ -82,10 +81,10 @@ class BinarySearchTree<K, V, T>(
 
         override fun next(): MutableEntry<K, V> {
             if (modCount != expectedModCount) throw ConcurrentModificationException()
-            if (next == null) throw NoSuchElementException()
-            lastReturned = next
-            next = next!!.nextToTheSide(RIGHT)
-            return lastReturned!!
+            val cur = next ?: throw NoSuchElementException()
+            lastReturned = cur
+            next = cur.nextToTheSide(RIGHT)
+            return cur
         }
 
         override fun remove() {
@@ -103,25 +102,5 @@ class BinarySearchTree<K, V, T>(
 
         fun <K : Comparable<K>, V> of(balancer: TreeBalancer<*>): BinarySearchTree<K, V, *> =
             BinarySearchTree(balancer, naturalOrder())
-
-        // internal for testing
-        internal fun <K, V, T> ifParentOfTwoSwapNonUserDataWithSuccessor(node: Node<K, V, T>) {
-            if (node.has(LEFT) && node.has(RIGHT)) {
-                val succ = node.right!!.farthestDescendent(LEFT)
-                node.balancerData = succ.balancerData.also { succ.balancerData = node.balancerData }
-                succ.attachChild(LEFT, node.left)
-                node.left = null // `succ` used to be leftest so it didn't have left child
-                if (succ === node.right) {
-                    succ.attachInPlaceOf(node)
-                    node.attachChild(RIGHT, succ.right)
-                    succ.attachChild(RIGHT, node)
-                } else { // `succ` is left child of some descendant
-                    val oldParent = node.parent
-                    node.attachInPlaceOf(succ)
-                    oldParent.replaceChild(node, succ)
-                    succ.attachChild(RIGHT, node.right.also { node.attachChild(RIGHT, succ.right) })
-                }
-            }
-        }
     }
 }

@@ -4,12 +4,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import spbu_coding.trees_3.*
 import spbu_coding.trees_3.balancers.NodeColor.*
 import spbu_coding.trees_3.balancers.RedBlackTreeBalancer.color
-import spbu_coding.trees_3.deleteNodeWithAtMostOneChild
-import spbu_coding.trees_3.isRoot
-import spbu_coding.trees_3.parentNode
-import spbu_coding.trees_3.test_node.*
 import java.lang.Integer.max
 
 typealias RBTestNode = TestNode<NodeColor>

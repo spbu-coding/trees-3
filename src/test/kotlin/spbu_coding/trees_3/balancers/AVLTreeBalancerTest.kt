@@ -5,12 +5,8 @@ import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import spbu_coding.trees_3.*
 import spbu_coding.trees_3.NodeSide.RIGHT
-import spbu_coding.trees_3.assertLeftChildIs
-import spbu_coding.trees_3.assertRightChildIs
-import spbu_coding.trees_3.assertRootIs
-import spbu_coding.trees_3.deleteNodeWithAtMostOneChild
-import spbu_coding.trees_3.test_node.*
 
 typealias AVLTestNode = TestNode<Int>
 
