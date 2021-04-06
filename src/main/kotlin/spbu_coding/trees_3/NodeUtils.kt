@@ -83,3 +83,28 @@ fun <K, V, T> NodeParent<K, V, T>.replaceChild(old: Node<K, V, T>, new: Node<K, 
     }
     new?.parent = this
 }
+
+fun <K, V, T> Node<K, V, T>.delete() {
+    // If `node` has two children, its `balancerData` and position in the tree are swapped with those of `node` in-order successor.
+    // Swapping ultimately results in `node` not having a left child because `node` successor couldn't have a left child before swapping since the successor was the leftmost descendant.
+    // From the standpoint of `TreeBalancer` swapping doesn't change tree structure because each `balancerData` ends up in the same position.
+    // From the standpoint of `EntryIterator` swapping doesn't change its next node key because no keys are changed as `Node.key` is immutable and can't be changed.
+    // From the standpoint of BST swapping temporally changes the order of nodes, but correct order is restored at the end of the function when `node` is deleted.
+    if (has(LEFT) && has(RIGHT)) {
+        val succ = right!!.farthestDescendent(LEFT)
+        balancerData = succ.balancerData.also { succ.balancerData = balancerData }
+        succ.attachChild(LEFT, left)
+        left = null // `succ` used to be leftmost so it didn't have left child
+        if (succ === right) {
+            succ.attachInPlaceOf(this)
+            attachChild(RIGHT, succ.right)
+            succ.attachChild(RIGHT, this)
+        } else { // `succ` is left child of some descendant
+            val oldParent = parent
+            attachInPlaceOf(succ)
+            oldParent.replaceChild(this, succ)
+            succ.attachChild(RIGHT, right.also { attachChild(RIGHT, succ.right) })
+        }
+    }
+    deleteNodeWithAtMostOneChild()
+}

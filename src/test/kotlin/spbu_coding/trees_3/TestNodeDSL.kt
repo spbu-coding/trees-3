@@ -1,4 +1,4 @@
-package spbu_coding.trees_3.test_node
+package spbu_coding.trees_3
 
 import spbu_coding.trees_3.*
 
