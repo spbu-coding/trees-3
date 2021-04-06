@@ -81,10 +81,10 @@ class BinarySearchTree<K, V, T>(
 
         override fun next(): MutableEntry<K, V> {
             if (modCount != expectedModCount) throw ConcurrentModificationException()
-            if (next == null) throw NoSuchElementException()
-            lastReturned = next
-            next = next!!.nextToTheSide(RIGHT)
-            return lastReturned!!
+            val cur = next ?: throw NoSuchElementException()
+            lastReturned = cur
+            next = cur.nextToTheSide(RIGHT)
+            return cur
         }
 
         override fun remove() {
