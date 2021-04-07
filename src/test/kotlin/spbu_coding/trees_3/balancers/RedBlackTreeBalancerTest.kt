@@ -342,7 +342,7 @@ class RedBlackTreeBalancerTest : AbstractTreeBalancerTest<RedBlackTreeBalancer, 
             assertEquals(BLACK, node.color)
         }
         if (node.color == RED && !node.isRoot) {
-            assertEquals(BLACK, node.parentNode?.color)
+            assertEquals(BLACK, node.parentNode.color)
         }
         val leftSubtree = assertRBShapeCheckAndGetHeight(node.left)
         val rightSubtree = assertRBShapeCheckAndGetHeight(node.right)

@@ -361,11 +361,21 @@ class NodeUtilsTest {
             newNode = createTestNode(-1, "new node") {}
         }
 
-        @Test
-        fun `when new root is attached then new root should be attached`() {
-            rootHolder.attachRoot(newNode)
+        @Nested
+        inner class AttachRoot {
+            @Test
+            fun `when new root is attached then new root should be attached`() {
+                rootHolder.attachRoot(newNode)
 
-            rootHolder.assertRootIs(newNode)
+                rootHolder.assertRootIs(newNode)
+            }
+
+            @Test
+            fun `when null root is attached then null should be root`() {
+                rootHolder.attachRoot(null)
+
+                rootHolder.assertRootIs(null)
+            }
         }
 
         @Nested
