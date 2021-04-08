@@ -13,17 +13,7 @@ typealias RBNode<K, V> = Node<K, V, NodeColor>
 object RedBlackTreeBalancer : TreeBalancer<NodeColor> {
     var RBNode<*, *>?.color: NodeColor
         get() = this?.balancerData ?: BLACK
-        set(value) {
-            if (this != null) {
-                balancerData = value
-            }
-        }
-
-    private fun <K, V> RBNode<K, V>.sibling() = parentNode?.let { it[side!!.opposite] }
-
-    private fun <K, V> RBNode<K, V>.uncle() = parentNode?.sibling()
-
-    private fun <K, V> RBNode<K, V>.grandparent() = parentNode?.parentNode
+        set(value) = run { this?.balancerData = value }
 
     private fun <K, V> rotate(side: NodeSide, node: RBNode<K, V>) {
         val c = node[side.opposite]!!
@@ -38,58 +28,64 @@ object RedBlackTreeBalancer : TreeBalancer<NodeColor> {
     override fun <K, V> rebalanceAfterInsertion(node: RBNode<K, V>) {
         @Suppress("NAME_SHADOWING") // intentional making parameter mutable
         var node = node
-        while (!node.isRoot && node.parentNode.color == RED) {
-            val uncle = node.uncle()
-            if (uncle.color == RED) {
-                node.parentNode.color = BLACK
-                uncle.color = BLACK
-                node.grandparent().color = RED
-                node = node.grandparent() ?: break
-            } else {
-                val side = node.parentNode?.side
-                if (node.side != node.parentNode?.side) {
-                    node = node.parentNode ?: break
-                    rotate(side!!, node)
+        while (true) {
+            var parent = node.parentNode ?: break
+            if (parent.color == BLACK) break
+            val parentSide = parent.side!!
+            val grandparent = parent.parentNode!!
+            val uncle = grandparent[parentSide.opposite]
+            when (uncle.color) {
+                RED -> {
+                    parent.color = BLACK
+                    uncle.color = BLACK
+                    grandparent.color = RED
+                    node = grandparent
                 }
-                node.parentNode.color = BLACK
-                node.grandparent().color = RED
-                rotate(side?.opposite!!, node.grandparent()!!)
+                BLACK -> {
+                    if (node.side != parentSide) {
+                        node = parent
+                        rotate(parentSide, node)
+                        parent = node.parentNode!!
+                    }
+                    parent.color = BLACK
+                    grandparent.color = RED
+                    rotate(parentSide.opposite, grandparent)
+                }
             }
         }
-        while (!node.isRoot) node = node.parentNode!!
+        while (true) node = node.parentNode ?: break
         node.color = BLACK
     }
 
     override fun <K, V> rebalanceAfterDeletion(node: RBNode<K, V>) {
-        if (node.color == RED)
-            return
+        if (node.color == RED) return
         @Suppress("NAME_SHADOWING") // intentional making parameter mutable
         var node = node.left ?: node.right ?: node
-        while (!node.isRoot && node.color == BLACK) {
-            val nodeSide = node.side ?: if (node.parentNode?.has(LEFT) == true) RIGHT else LEFT
+        while (node.color == BLACK) {
             val parent = node.parentNode ?: break
-            var sib = parent[nodeSide.opposite]
+            val nodeSide = node.side ?: if (parent.has(LEFT)) RIGHT else LEFT
+            var sib = parent[nodeSide.opposite]!!
             if (sib.color == RED) {
                 sib.color = BLACK
                 parent.color = RED
-                rotate(nodeSide, node.parentNode ?: break)
-                sib = parent[nodeSide.opposite]
+                rotate(nodeSide, parent)
+                sib = parent[nodeSide.opposite]!!
             }
-            if (sib?.left.color == BLACK && sib?.right.color == BLACK) {
+            if (sib.left.color == BLACK && sib.right.color == BLACK) {
                 sib.color = RED
                 node = parent
             } else {
-                if (sib!![nodeSide.opposite].color == BLACK) {
+                if (sib[nodeSide.opposite].color == BLACK) {
                     sib[nodeSide].color = BLACK
                     sib.color = RED
                     rotate(nodeSide.opposite, sib)
-                    sib = parent[nodeSide.opposite] ?: break
+                    sib = parent[nodeSide.opposite]!!
                 }
-                sib.color = node.parentNode.color
+                sib.color = parent.color
                 parent.color = BLACK
                 sib[nodeSide.opposite].color = BLACK
                 rotate(nodeSide, parent)
-                while (!node.isRoot) node = node.parentNode!!
+                while (true) node = node.parentNode ?: break
                 break
             }
         }
