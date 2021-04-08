@@ -298,7 +298,7 @@ class RedBlackTreeBalancerTest : AbstractTreeBalancerTest<RedBlackTreeBalancer, 
         }
 
         @Test
-        fun `when only one sibling's child is red then tree invariants should be preserved`() {
+        fun `when only left sibling's child is red then tree invariants should be preserved`() {
             lateinit var deleted: RBTestNode
             root {
                 left(BLACK) {
@@ -332,7 +332,40 @@ class RedBlackTreeBalancerTest : AbstractTreeBalancerTest<RedBlackTreeBalancer, 
             rebalanceAfterDeletionAssertingOrderIsPreserved(deleted)
         }
 
-
+        @Test
+        fun `when only right sibling's child is red then tree invariants should be preserved`() {
+            lateinit var deleted: RBTestNode
+            root {
+                left(BLACK) {
+                    left(BLACK) {
+                        left(BLACK) {}
+                        deleted = right(BLACK) {}
+                    }
+                    right(BLACK) {
+                        left(BLACK) {}
+                        right(BLACK) {}
+                    }
+                }
+                right(BLACK) {
+                    left(BLACK) {
+                        left(BLACK) {}
+                        right(BLACK) {}
+                    }
+                    right(RED) {
+                        left(BLACK) {
+                            left(BLACK) {}
+                            right(BLACK) {}
+                        }
+                        right(BLACK) {
+                            left(BLACK) {}
+                            right(BLACK) {}
+                        }
+                    }
+                }
+            }
+            deleted.deleteNodeWithAtMostOneChild()
+            rebalanceAfterDeletionAssertingOrderIsPreserved(deleted)
+        }
     }
 
     private fun assertRBShapeCheckAndGetHeight(node: RBTestNode?): Int {
